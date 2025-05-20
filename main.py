@@ -1,5 +1,3 @@
-# Don't Remove Credit Tg - @chahal_badfella
-# Ask Doubt on telegram @chahal_badfella
 import signal
 import os
 import re
