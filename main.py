@@ -81,40 +81,62 @@ bot = Client(
     bot_token=BOT_TOKEN)
 
 # Sudo command to add/remove sudo users
-@bot.on_message(filters.command("sudo"))
-async def sudo_command(bot: Client, message: Message):
+# Add sudo user via /sudoadd <user_id>
+@bot.on_message(filters.command("sudoadd"))
+async def sudo_add_command(bot: Client, message: Message):
     user_id = message.chat.id
     if user_id != OWNER_ID:
         await message.reply_text(ibb)
         return
 
     try:
-        args = message.text.split(" ", 2)
+        args = message.text.split(" ", 1)
         if len(args) < 2:
-            await message.reply_text("**Usage:** `/sudo add <user_id>` or `/sudo remove <user_id>`")
+            await message.reply_text("**Usage:** `/sudoadd <user_id>`")
             return
 
-        action = args[1].lower()
-        target_user_id = int(args[2])
+        target_user_id = int(args[1])
 
-        if action == "add":
-            if target_user_id not in SUDO_USERS:
-                SUDO_USERS.append(target_user_id)
-                await message.reply_text(f"**✅ User {target_user_id} added to sudo list.**")
-            else:
-                await message.reply_text(f"**⚠️ User {target_user_id} is already in the sudo list.**")
-        elif action == "remove":
-            if target_user_id == OWNER_ID:
-                await message.reply_text("**🚫 The owner cannot be removed from the sudo list.**")
-            elif target_user_id in SUDO_USERS:
-                SUDO_USERS.remove(target_user_id)
-                await message.reply_text(f"**✅ User {target_user_id} removed from sudo list.**")
-            else:
-                await message.reply_text(f"**⚠️ User {target_user_id} is not in the sudo list.**")
+        if target_user_id not in SUDO_USERS:
+            SUDO_USERS.append(target_user_id)
+            await message.reply_text(f"✅ User `{target_user_id}` added to sudo list.")
         else:
-            await message.reply_text("**Usage:** `/sudo add <user_id>` or `/sudo remove <user_id>`")
+            await message.reply_text(f"⚠️ User `{target_user_id}` is already in the sudo list.")
+
+    except ValueError:
+        await message.reply_text("❌ Invalid user ID. Please provide a valid integer.")
     except Exception as e:
-        await message.reply_text(f"**Error:** {str(e)}")
+        await message.reply_text(f"❌ Error: {str(e)}")
+
+
+# Remove sudo user via /sudoremove <user_id>
+@bot.on_message(filters.command("sudoremove"))
+async def sudo_remove_command(bot: Client, message: Message):
+    user_id = message.chat.id
+    if user_id != OWNER_ID:
+        await message.reply_text(ibb)
+        return
+
+    try:
+        args = message.text.split(" ", 1)
+        if len(args) < 2:
+            await message.reply_text("**Usage:** `/sudoremove <user_id>`")
+            return
+
+        target_user_id = int(args[1])
+
+        if target_user_id == OWNER_ID:
+            await message.reply_text("🚫 The owner cannot be removed from the sudo list.")
+        elif target_user_id in SUDO_USERS:
+            SUDO_USERS.remove(target_user_id)
+            await message.reply_text(f"✅ User `{target_user_id}` removed from sudo list.")
+        else:
+            await message.reply_text(f"⚠️ User `{target_user_id}` is not in the sudo list.")
+
+    except ValueError:
+        await message.reply_text("❌ Invalid user ID. Please provide a valid integer.")
+    except Exception as e:
+        await message.reply_text(f"❌ Error: {str(e)}")
 
 # Inline keyboard for start command
 keyboard = InlineKeyboardMarkup(
